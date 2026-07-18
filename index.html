@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Advanced CGPA Calculator</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Segoe UI',sans-serif;
+}
+
+body{
+min-height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+background:linear-gradient(135deg,#667eea,#764ba2);
+padding:20px;
+transition:0.5s;
+}
+
+body.dark{
+background:#111827;
+}
+
+.container{
+width:100%;
+max-width:700px;
+background:rgba(255,255,255,0.15);
+backdrop-filter:blur(15px);
+padding:25px;
+border-radius:20px;
+color:white;
+box-shadow:0 8px 32px rgba(0,0,0,0.3);
+}
+
+h1{
+text-align:center;
+margin-bottom:10px;
+}
+
+.subtitle{
+text-align:center;
+margin-bottom:20px;
+opacity:0.8;
+}
+
+.semester{
+margin-bottom:15px;
+}
+
+.semester label{
+display:block;
+margin-bottom:5px;
+}
+
+.semester input{
+width:100%;
+padding:12px;
+border:none;
+border-radius:10px;
+outline:none;
+font-size:16px;
+}
+
+.buttons{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-top:20px;
+}
+
+button{
+flex:1;
+padding:12px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+font-weight:bold;
+transition:0.3s;
+}
+
+button:hover{
+transform:translateY(-2px);
+}
+
+.calc{
+background:#22c55e;
+color:white;
+}
+
+.pdf{
+background:#ef4444;
+color:white;
+}
+
+.theme{
+background:#3b82f6;
+color:white;
+}
+
+.result{
+margin-top:25px;
+padding:20px;
+background:rgba(255,255,255,0.1);
+border-radius:15px;
+text-align:center;
+}
+
+.result p{
+font-size:20px;
+margin:10px 0;
+}
+
+.progress{
+height:20px;
+background:#ddd;
+border-radius:20px;
+overflow:hidden;
+margin-top:15px;
+}
+
+.bar{
+height:100%;
+width:0%;
+background:linear-gradient(90deg,#00ff88,#00cc66);
+transition:1s;
+}
+
+.footer{
+margin-top:20px;
+text-align:center;
+opacity:0.8;
+}
+
+</style>
+</head>
+<body>
+
+<div class="container" id="report">
+
+<h1>🎓  CGPA Calculator</h1>
+<p class="subtitle">Calculate CGPA Semester Wise</p>
+
+<div id="semesters"></div>
+
+<div class="buttons">
+<button class="calc" onclick="calculateCGPA()">📊 Calculate</button>
+
+<button class="theme" onclick="toggleTheme()">🌙 Theme</button>
+</div>
+
+<div class="result">
+<h2>Result</h2>
+
+<p>CGPA : <span id="cgpa">0.00</span></p>
+
+<p>Percentage : <span id="percentage">0%</span></p>
+
+<p>Grade : <span id="grade">-</span></p>
+
+<div class="progress">
+<div class="bar" id="bar"></div>
+</div>
+
+</div>
+
+<div class="footer">
+Made with ❤️ by Rishabh Rana
+</div>
+
+</div>
+
+<script>
+
+// Generate 8 Semesters
+
+const semesterDiv =
+document.getElementById("semesters");
+
+for(let i=1;i<=8;i++){
+
+semesterDiv.innerHTML += `
+
+<div class="semester">
+
+<label>Semester ${i} SGPA</label>
+
+<input
+type="number"
+class="sgpa"
+placeholder="Enter SGPA"
+step="0.01"
+min="0"
+max="10">
+
+</div>
+
+`;
+
+}
+
+// Load saved data
+
+loadData();
+
+function calculateCGPA(){
+
+const inputs =
+document.querySelectorAll(".sgpa");
+
+let total=0;
+let count=0;
+
+inputs.forEach(input=>{
+
+if(input.value!==""){
+
+total += parseFloat(input.value);
+count++;
+
+}
+
+});
+
+if(count===0){
+
+alert("Please enter SGPA values");
+return;
+
+}
+
+const cgpa = total/count;
+
+const percentage = cgpa*9.5;
+
+let grade="C";
+
+if(cgpa>=9){
+grade="O";
+}
+else if(cgpa>=8){
+grade="A+";
+}
+else if(cgpa>=7){
+grade="A";
+}
+else if(cgpa>=6){
+grade="B+";
+}
+else if(cgpa>=5){
+grade="B";
+}
+
+document.getElementById("cgpa")
+.innerText=cgpa.toFixed(2);
+
+document.getElementById("percentage")
+.innerText=percentage.toFixed(2)+"%";
+
+document.getElementById("grade")
+.innerText=grade;
+
+document.getElementById("bar")
+.style.width=(cgpa*10)+"%";
+
+saveData();
+
+}
+
+// Save Local Storage
+
+function saveData(){
+
+const values=[];
+
+document
+.querySelectorAll(".sgpa")
+.forEach(input=>{
+
+values.push(input.value);
+
+});
+
+localStorage.setItem(
+"cgpaData",
+JSON.stringify(values)
+);
+
+}
+
+// Load Local Storage
+
+function loadData(){
+
+const values =
+JSON.parse(
+localStorage.getItem("cgpaData")
+) || [];
+
+document
+.querySelectorAll(".sgpa")
+.forEach((input,index)=>{
+
+input.value=
+values[index] || "";
+
+});
+
+}
+
+// Auto Save
+
+document.addEventListener(
+"input",
+saveData
+);
+
+// Dark Mode
+
+function toggleTheme(){
+
+document.body.classList.toggle("dark");
+
+}
+
+
+
+
+</script>
+
+</body>
+</html>
