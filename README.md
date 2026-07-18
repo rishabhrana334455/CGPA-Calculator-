@@ -108,7 +108,7 @@ CGPA-Calculator/
 
 BCA Student | Web Developer | Tech Enthusiast
 
-- GitHub: 
+- GitHub: https://github.com/rishabhrana334455
 - LinkedIn: 
 
 ---
